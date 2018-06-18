@@ -18,7 +18,8 @@ namespace Assets.Editor
 			var currentEntityId = 1;
 
 			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate());
-			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateCubeTemplate());
+
+			BuildTiles (ref snapshotEntities, ref currentEntityId);
 
 			SaveSnapshot(snapshotEntities);
 		}
@@ -40,6 +41,22 @@ namespace Assets.Editor
 			}
 
 			Debug.LogFormat("Successfully generated initial world snapshot at {0}", SimulationSettings.DefaultSnapshotPath);
+		}
+
+		private static void BuildTiles(ref Dictionary<EntityId, Entity> snapshotEntities, ref int currentEntityId)
+		{
+			// TODO move magic constants to settings
+
+			for (var offsetX = -20; offsetX <= 20; offsetX += 1) {
+				for (var offsetZ = -20; offsetZ <= 20; offsetZ += 1) {
+
+					if (offsetX + offsetZ > 20 || offsetX + offsetZ < 20)
+						continue;
+
+					snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateTileTemplate(offsetX, offsetZ));
+				}
+			}
+
 		}
 	}
 }

@@ -6,7 +6,8 @@ namespace Assets.Gamelogic.Core
     {
         public static readonly string PlayerPrefabName = "Player";
         public static readonly string PlayerCreatorPrefabName = "PlayerCreator";
-        public static readonly string CubePrefabName = "Cube";
+//        public static readonly string CubePrefabName = "Cube";
+		public static readonly string TilePrefabName = "Tile";
 
         public static readonly float HeartbeatCheckIntervalSecs = 3;
         public static readonly uint TotalHeartbeatsBeforeTimeout = 3;
@@ -18,6 +19,9 @@ namespace Assets.Gamelogic.Core
 
         public static readonly float PlayerCreatorQueryRetrySecs = 4;
         public static readonly float PlayerEntityCreationRetrySecs = 4;
+
+		// World generation settings
+		public static float TileRadius = 0.5f;
 
         public static readonly string DefaultSnapshotPath = Application.dataPath + "/../../../snapshots/default.snapshot";
     }

@@ -43,17 +43,28 @@ namespace Assets.Gamelogic.EntityTemplates
             return playerTemplate;
         }
 
-        public static Entity CreateCubeTemplate()
-        {
-            var cubeTemplate = EntityBuilder.Begin()
-                .AddPositionComponent(Improbable.Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
-                .AddMetadataComponent(entityType: SimulationSettings.CubePrefabName)
-                .SetPersistence(true)
-                .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
-                .AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
-                .Build();
+		public static Entity CreateTileTemplate(int offsetX, int offsetZ)
+		{
+			float TileDiameter = SimulationSettings.TileRadius * 2.0f;
+			float sixtyDeg = Mathf.PI / 3.0f;
 
-            return cubeTemplate;
-        }
+			float worldX = 
+				(float)offsetX * TileDiameter + 
+				(float)offsetZ * TileDiameter * Mathf.Cos (sixtyDeg);
+			
+			float worldZ = 
+				(float)offsetZ * TileDiameter * Mathf.Sin (sixtyDeg);
+
+			var tileTemplate = EntityBuilder.Begin ()
+				.AddPositionComponent (new Vector3 (worldX, 0.0f, worldZ), CommonRequirementSets.PhysicsOnly)
+				.AddMetadataComponent (entityType: SimulationSettings.TilePrefabName)
+				.SetPersistence (true)
+				.SetReadAcl (CommonRequirementSets.PhysicsOrVisual)
+				.AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+				.Build ();
+		
+			return tileTemplate; // FIXME
+		}
+		
     }
 }

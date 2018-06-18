@@ -13,6 +13,8 @@ namespace Assets.Gamelogic.Core
 
         void OnEnable()
         {
+			Debug.Log ("Enabled TransformReceiver for: ");
+
             transform.position = PositionReader.Data.coords.ToUnityVector();
             transform.rotation = RotationReader.Data.rotation.ToUnityQuaternion();
 
