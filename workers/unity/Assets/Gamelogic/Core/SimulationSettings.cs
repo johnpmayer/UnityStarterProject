@@ -19,6 +19,6 @@ namespace Assets.Gamelogic.Core
         public static readonly float PlayerCreatorQueryRetrySecs = 4;
         public static readonly float PlayerEntityCreationRetrySecs = 4;
 
-        public static readonly string DefaultSnapshotPath = Application.dataPath + "/../../../snapshots/default.snapshot";
+        public static readonly string DefaultSnapshotPath = Application.dataPath + "/../../../snapshots/default.snapshot";       
     }
 }

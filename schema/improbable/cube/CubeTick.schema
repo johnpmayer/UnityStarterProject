@@ -1,0 +1,6 @@
+package improbable.cube;
+
+component CubeTick {
+	id = 1007;
+	int32 tick = 1;
+}

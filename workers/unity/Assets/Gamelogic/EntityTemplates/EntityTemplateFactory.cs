@@ -8,6 +8,7 @@ using Quaternion = UnityEngine.Quaternion;
 using UnityEngine;
 using Improbable.Unity.Entity;
 using Improbable.Collections;
+using Improbable.Cube;
 
 namespace Assets.Gamelogic.EntityTemplates
 {
@@ -50,6 +51,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddMetadataComponent(entityType: SimulationSettings.CubePrefabName)
                 .SetPersistence(true)
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
+                .AddComponent(new CubeTick.Data(0), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .Build();
 
