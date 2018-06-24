@@ -1,10 +1,8 @@
 package improbable.player;
 
-	
 import "improbable/vector3.schema";
 
 component WalkControls {
   id = 1008;
-
   Vector3f target_speed = 1;
 }

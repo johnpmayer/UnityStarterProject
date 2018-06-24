@@ -18,7 +18,8 @@ namespace Assets.Editor
 			var currentEntityId = 1;
 
 			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate());
-			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateCubeTemplate());
+            snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateIslandTemplate(0, 0, "Greenish Land"));
+            snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateShipTemplate(0, 30, "SS McBoatFace"));
 
 			SaveSnapshot(snapshotEntities);
 		}

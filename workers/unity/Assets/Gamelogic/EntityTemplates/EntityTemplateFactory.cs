@@ -4,11 +4,11 @@ using Improbable.Core;
 using Improbable.Player;
 using Improbable.Unity.Core.Acls;
 using Improbable.Worker;
-using Quaternion = UnityEngine.Quaternion;
 using UnityEngine;
 using Improbable.Unity.Entity;
 using Improbable.Collections;
-using Improbable.Cube;
+using Improbable.Island;
+using Improbable.Ship;
 
 namespace Assets.Gamelogic.EntityTemplates
 {
@@ -17,11 +17,11 @@ namespace Assets.Gamelogic.EntityTemplates
         public static Entity CreatePlayerCreatorTemplate()
         {
             var playerCreatorEntityTemplate = EntityBuilder.Begin()
-                .AddPositionComponent(Improbable.Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
+                .AddPositionComponent(Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
                 .AddMetadataComponent(entityType: SimulationSettings.PlayerCreatorPrefabName)
                 .SetPersistence(true)
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
-                .AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new PlayerCreation.Data(), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new ClientEntityStore.Data(new Map<string, EntityId>()), CommonRequirementSets.PhysicsOnly)
                 .Build();
@@ -32,11 +32,11 @@ namespace Assets.Gamelogic.EntityTemplates
         public static Entity CreatePlayerTemplate(string clientId, EntityId playerCreatorId)
         {
             var playerTemplate = EntityBuilder.Begin()
-                .AddPositionComponent(Improbable.Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
+                .AddPositionComponent(Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
                 .AddMetadataComponent(entityType: SimulationSettings.PlayerPrefabName)
                 .SetPersistence(false)
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
-                .AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new ClientAuthorityCheck.Data(), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(new ClientConnection.Data(SimulationSettings.TotalHeartbeatsBeforeTimeout, clientId, playerCreatorId), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new WalkControls.Data(new Vector3f(0.0f, 0.0f, 0.0f)), CommonRequirementSets.SpecificClientOnly(clientId))
@@ -45,18 +45,36 @@ namespace Assets.Gamelogic.EntityTemplates
             return playerTemplate;
         }
 
-        public static Entity CreateCubeTemplate()
+        public static Entity CreateIslandTemplate(double x, double z, string name)
         {
-            var cubeTemplate = EntityBuilder.Begin()
-                .AddPositionComponent(Improbable.Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
-                .AddMetadataComponent(entityType: SimulationSettings.CubePrefabName)
+            var position = new Coordinates(x, 0.0f, z).ToUnityVector();
+
+            var islandTemplate = EntityBuilder.Begin()
+                .AddPositionComponent(position, CommonRequirementSets.PhysicsOnly)
+                .AddMetadataComponent(entityType: SimulationSettings.IslandPrefabName)
                 .SetPersistence(true)
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
-                .AddComponent(new CubeTick.Data(0), CommonRequirementSets.PhysicsOnly)
-                .AddComponent(new Rotation.Data(Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new IslandMetadata.Data(name), CommonRequirementSets.PhysicsOnly)
                 .Build();
 
-            return cubeTemplate;
+            return islandTemplate;
+        }
+
+        public static Entity CreateShipTemplate(double x, double z, string name)
+        {
+            var position = new Coordinates(x, 0.0f, z).ToUnityVector();
+
+            var shipTemplate = EntityBuilder.Begin()
+                .AddPositionComponent(position, CommonRequirementSets.PhysicsOnly)
+                .AddMetadataComponent(entityType: SimulationSettings.ShipPrefabName)
+                .SetPersistence(true)
+                .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
+                .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new ShipMetadata.Data(name), CommonRequirementSets.PhysicsOnly)
+                .Build();
+
+            return shipTemplate;
         }
     }
 }

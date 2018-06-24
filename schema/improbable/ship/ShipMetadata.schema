@@ -1,0 +1,6 @@
+package improbable.ship;
+
+component ShipMetadata {
+	id = 3000;
+	string name = 1;
+}

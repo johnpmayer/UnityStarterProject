@@ -1,12 +1,7 @@
-﻿using Assets.Gamelogic.Core;
-using Assets.Gamelogic.Utils;
-using Improbable.Core;
-using Improbable.Player;
+﻿using Improbable.Core;
 using Improbable.Unity;
-using Improbable.Unity.Core;
 using Improbable.Unity.Visualizer;
 using UnityEngine;
-using System.Collections;
 
 namespace Assets.Gamelogic.Player
 {

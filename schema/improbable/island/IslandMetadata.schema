@@ -1,0 +1,6 @@
+package improbable.island;
+
+component IslandMetadata {
+	id = 2000;
+	string name = 1;
+}
