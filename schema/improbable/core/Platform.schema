@@ -1,0 +1,19 @@
+package improbable.core;
+
+component PlatformBounds {
+    id = 4000;
+
+    double min_x = 1;
+    double max_x = 2;
+    double min_z = 3;
+    double max_z = 4;
+}
+
+component PlatformPosition {
+    id = 4001;
+
+    double x = 1;
+    double z = 2;
+
+    EntityId platform_entity = 3;
+}

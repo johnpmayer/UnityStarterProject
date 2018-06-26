@@ -1,5 +1,7 @@
 package improbable.ship;
 
+import "improbable/core/Platform.schema";
+
 component ShipMetadata {
 	id = 3000;
 	string name = 1;

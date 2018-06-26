@@ -1,5 +1,7 @@
 package improbable.island;
 
+import "improbable/core/Platform.schema";
+
 component IslandMetadata {
 	id = 2000;
 	string name = 1;

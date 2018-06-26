@@ -53,12 +53,12 @@ namespace Assets.Gamelogic.ClientManager
 
     class SelectedIsland : ISelection
     {
-        private readonly GameObject _gameObject;
+        // private readonly GameObject _gameObject;
         private readonly IslandMetadataReceiver _islandMetadataReceiver;
 
         public SelectedIsland(GameObject gameObject, IslandMetadataReceiver islandMetadataReceiver)
         {
-            _gameObject = gameObject;
+            // _gameObject = gameObject;
             _islandMetadataReceiver = islandMetadataReceiver;
         }
 

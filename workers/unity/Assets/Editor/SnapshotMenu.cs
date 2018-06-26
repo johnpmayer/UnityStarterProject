@@ -17,9 +17,12 @@ namespace Assets.Editor
 			var snapshotEntities = new Dictionary<EntityId, Entity>();
 			var currentEntityId = 1;
 
-			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate());
-            snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateIslandTemplate(0, 0, "Greenish Land"));
-            snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateShipTemplate(0, 30, "SS McBoatFace"));
+			var islandEntityId = new EntityId(currentEntityId++);
+
+			snapshotEntities.Add(islandEntityId, EntityTemplateFactory.CreateIslandTemplate(0, 0, "Greenish Land"));
+
+			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate(0, 0, islandEntityId));
+            snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateShipTemplate(-5, 25, 0, "SS McBoatFace"));
 
 			SaveSnapshot(snapshotEntities);
 		}

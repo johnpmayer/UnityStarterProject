@@ -25,6 +25,9 @@ namespace Assets.Gamelogic.Core
         [Require]
         private ClientEntityStore.Writer ClientEntityStoreWriter;
 
+        [Require]
+        private PlatformPosition.Reader PlatformPositionReader;
+
         private HashSet<string> inFlightClientRequests;
 
         private void OnEnable()
@@ -100,7 +103,8 @@ namespace Assets.Gamelogic.Core
         private void CreatePlayerEntity(string clientWorkerId,
                                         ResponseHandle<PlayerCreation.Commands.CreatePlayer, CreatePlayerRequest, CreatePlayerResponse> responseHandle)
         {
-            var playerEntityTemplate = EntityTemplateFactory.CreatePlayerTemplate(clientWorkerId, gameObject.EntityId());
+            var platformDataToCopy = PlatformPositionReader.Data;
+            var playerEntityTemplate = EntityTemplateFactory.CreatePlayerTemplate(clientWorkerId, gameObject.EntityId(), platformDataToCopy.x, platformDataToCopy.z, platformDataToCopy.platformEntity);
             SpatialOS.Commands.CreateEntity(PlayerCreationWriter, playerEntityTemplate)
                 .OnSuccess(response =>
                      {
