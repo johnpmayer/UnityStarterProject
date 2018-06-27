@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Improbable.Core;
 
 namespace Assets.Editor
 {
@@ -21,7 +22,9 @@ namespace Assets.Editor
 
 			snapshotEntities.Add(islandEntityId, EntityTemplateFactory.CreateIslandTemplate(0, 0, "Greenish Land"));
 
-			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate(0, 0, islandEntityId));
+			var playerCreatorPlatformPosition = new PlatformPosition.Data(new Vector3f(0.0f, 0.0f, 0.0f), islandEntityId);
+
+			snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreatePlayerCreatorTemplate(playerCreatorPlatformPosition));
             snapshotEntities.Add(new EntityId(currentEntityId++), EntityTemplateFactory.CreateShipTemplate(-5, 25, 0, "SS McBoatFace"));
 
 			SaveSnapshot(snapshotEntities);

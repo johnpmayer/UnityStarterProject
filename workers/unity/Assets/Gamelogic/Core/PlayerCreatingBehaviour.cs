@@ -103,8 +103,8 @@ namespace Assets.Gamelogic.Core
         private void CreatePlayerEntity(string clientWorkerId,
                                         ResponseHandle<PlayerCreation.Commands.CreatePlayer, CreatePlayerRequest, CreatePlayerResponse> responseHandle)
         {
-            var platformDataToCopy = PlatformPositionReader.Data;
-            var playerEntityTemplate = EntityTemplateFactory.CreatePlayerTemplate(clientWorkerId, gameObject.EntityId(), platformDataToCopy.x, platformDataToCopy.z, platformDataToCopy.platformEntity);
+            var platformData = new PlatformPosition.Data(PlatformPositionReader.Data.DeepCopy());
+            var playerEntityTemplate = EntityTemplateFactory.CreatePlayerTemplate(clientWorkerId, gameObject.EntityId(), platformData);
             SpatialOS.Commands.CreateEntity(PlayerCreationWriter, playerEntityTemplate)
                 .OnSuccess(response =>
                      {

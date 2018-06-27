@@ -1,19 +1,19 @@
 package improbable.core;
 
+import "improbable/vector3.schema";
+
 component PlatformBounds {
     id = 4000;
 
-    double min_x = 1;
-    double max_x = 2;
-    double min_z = 3;
-    double max_z = 4;
+    float min_x = 1;
+    float max_x = 2;
+    float min_z = 3;
+    float max_z = 4;
 }
 
 component PlatformPosition {
     id = 4001;
 
-    double x = 1;
-    double z = 2;
-
-    EntityId platform_entity = 3;
+    Vector3f local_position = 1;
+    EntityId platform_entity = 2;
 }

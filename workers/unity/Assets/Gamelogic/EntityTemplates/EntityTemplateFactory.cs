@@ -14,7 +14,7 @@ namespace Assets.Gamelogic.EntityTemplates
 {
     public class EntityTemplateFactory : MonoBehaviour
     {
-        public static Entity CreatePlayerCreatorTemplate(double platformX, double platformZ, EntityId platformId)
+        public static Entity CreatePlayerCreatorTemplate(IComponentData<PlatformPosition> platformPosiionData)
         {
             var playerCreatorEntityTemplate = EntityBuilder.Begin()
                 .AddPositionComponent(Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
@@ -24,13 +24,13 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new PlayerCreation.Data(), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new ClientEntityStore.Data(new Map<string, EntityId>()), CommonRequirementSets.PhysicsOnly)
-                .AddComponent(new PlatformPosition.Data(platformX, platformZ, platformId),CommonRequirementSets.PhysicsOnly)
+                .AddComponent(platformPosiionData, CommonRequirementSets.PhysicsOnly)
                 .Build();
 
             return playerCreatorEntityTemplate;
         }
 
-        public static Entity CreatePlayerTemplate(string clientId, EntityId playerCreatorId, double platformX, double platformZ, EntityId platformId)
+        public static Entity CreatePlayerTemplate(string clientId, EntityId playerCreatorId, IComponentData<PlatformPosition> platformPosiionData)
         {
             var playerTemplate = EntityBuilder.Begin()
                 .AddPositionComponent(Coordinates.ZERO.ToUnityVector(), CommonRequirementSets.PhysicsOnly)
@@ -41,6 +41,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddComponent(new ClientAuthorityCheck.Data(), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(new ClientConnection.Data(SimulationSettings.TotalHeartbeatsBeforeTimeout, clientId, playerCreatorId), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new WalkControls.Data(new Vector3f(0.0f, 0.0f, 0.0f)), CommonRequirementSets.SpecificClientOnly(clientId))
+                .AddComponent(platformPosiionData, CommonRequirementSets.PhysicsOnly)
                 .Build();
 
             return playerTemplate;
@@ -58,7 +59,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
                 .AddComponent(new Rotation.Data(UnityEngine.Quaternion.identity.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new IslandMetadata.Data(name), CommonRequirementSets.PhysicsOnly)
-                .AddComponent(new PlatformBounds.Data(-30.0, 30.0, -20.0, 20.0), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new PlatformBounds.Data(-30.0f, 30.0f, -20.0f, 20.0f), CommonRequirementSets.PhysicsOnly)
                 .Build();
 
             return islandTemplate;
@@ -76,7 +77,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .SetReadAcl(CommonRequirementSets.PhysicsOrVisual)
                 .AddComponent(new Rotation.Data(rotationQuaternion.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new ShipMetadata.Data(name), CommonRequirementSets.PhysicsOnly)
-                .AddComponent(new PlatformBounds.Data(-5.0, 5.0, -3.0, 3.0), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new PlatformBounds.Data(-5.0f, 5.0f, -3.0f, 3.0f), CommonRequirementSets.PhysicsOnly)
                 .Build();
 
             return shipTemplate;
