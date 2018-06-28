@@ -1,0 +1,8 @@
+package improbable.ship;
+
+component PilotControls {
+    id = 3001;
+ 
+    float propellor = 1; // between -1.0f and 1.0f
+    float rudder = 2; // between -1.0f and 1.0f
+}

@@ -11,9 +11,16 @@ component PlatformBounds {
     float max_z = 4;
 }
 
+type BoardResponse {}
+type BoardRequest {
+  EntityId platform_entity_id = 1;
+}
+
 component PlatformPosition {
     id = 4001;
 
     Vector3f local_position = 1;
     EntityId platform_entity = 2;
+
+    command BoardResponse board(BoardRequest);
 }

@@ -4,13 +4,16 @@ using Improbable.Unity.Visualizer;
 using Assets.Gamelogic.Core;
 using Assets.Gamelogic.Ship;
 using Assets.Gamelogic.Island;
+using Assets.Gamelogic.Player;
 using UnityEngine.UI;
 
+// TODO - this is all kind of silly being on its own and should be moved to PlayerInputController
 namespace Assets.Gamelogic.ClientManager
 {
     interface ISelection
     {
         string UserMessage();
+        void HandleKeys();
     }
 
     class SelectedNothing : ISelection
@@ -19,6 +22,8 @@ namespace Assets.Gamelogic.ClientManager
         {
             return "";
         }
+
+        public void HandleKeys() {}
     }
 
     class SelectedShip : ISelection
@@ -49,6 +54,13 @@ namespace Assets.Gamelogic.ClientManager
                 DistanceFromPlayer(),
                 boardMessage);
         }
+
+        public void HandleKeys()
+        {
+            if (Input.GetKeyDown(KeyCode.B)) {
+                _playerObject.GetComponent<PlayerInputController>().TryBoard(_shipObject.EntityId());
+            }
+        }
     }
 
     class SelectedIsland : ISelection
@@ -66,6 +78,8 @@ namespace Assets.Gamelogic.ClientManager
         {
             return string.Format("Selected {0}", _islandMetadataReceiver.IslandName());
         }
+
+        public void HandleKeys() {}
     }
 
     [WorkerType(WorkerPlatform.UnityClient)]
@@ -87,6 +101,7 @@ namespace Assets.Gamelogic.ClientManager
         {
             UpdateSelection();
             UpdateUI();
+            _currentSelection.HandleKeys();
         }
 
         private void UpdateSelection() {

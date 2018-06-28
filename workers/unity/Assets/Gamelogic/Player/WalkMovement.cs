@@ -1,5 +1,6 @@
 ﻿using Improbable;
 using Improbable.Core;
+using Improbable.Entity.Component;
 using Improbable.Unity;
 using Improbable.Player;
 using Improbable.Unity.Visualizer;
@@ -29,11 +30,30 @@ namespace Assets.Gamelogic.Player {
 		private void OnEnable()
 		{
 			PlatformPositionWriter.PlatformEntityUpdated.AddAndInvoke(OnPlatformEntityUpdated);
+			PlatformPositionWriter.CommandReceiver.OnBoard.RegisterResponse(OnBoard);
 		}
 
 		private void OnDisable()
 		{
 			PlatformPositionWriter.PlatformEntityUpdated.Remove(OnPlatformEntityUpdated);
+		}
+
+		private BoardResponse OnBoard(BoardRequest request, ICommandCallerInfo callerInfo) {
+			if (!LocalEntities.Instance.ContainsEntity(request.platformEntityId)) {
+				Debug.LogError("The platform entity isn't being tracked locally...");
+				// todo probably should throw here instead
+			}
+
+			var targetObject = LocalEntities.Instance.Get(request.platformEntityId).UnderlyingGameObject;
+
+			// TODO - in-range and other validation
+
+			PlatformPositionWriter.Send(
+				new PlatformPosition.Update()
+				.SetLocalPosition(new Vector3f(0,0,0))
+				.SetPlatformEntity(request.platformEntityId));
+
+			return new BoardResponse(); // TODO - richer status?
 		}
 
 		private void FetchAndCachePlatformBounds(EntityId entityId)
