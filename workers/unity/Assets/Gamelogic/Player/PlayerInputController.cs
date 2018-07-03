@@ -13,6 +13,8 @@ using UnityEngine.UI;
 using Assets.Gamelogic.Ship;
 using Assets.Gamelogic.Island;
 using Assets.Gamelogic.Core;
+using System;
+using System.Collections;
 
 namespace Assets.Gamelogic.Player
 {
@@ -22,9 +24,27 @@ namespace Assets.Gamelogic.Player
     {
         interface IOnPlatform {}
 
-        class OnIsland : IOnPlatform {} // TODO Entity ID
+        class OnIsland : IOnPlatform {
+            public EntityId IslandId { get; set; }
 
-        class OnShip : IOnPlatform {} // TODO Entity ID
+            public string UserStatus() {
+                return string.Format("On Island {0}.",
+                    IslandId
+                );
+            }
+        }
+
+        class OnShip : IOnPlatform {
+            public EntityId ShipId { get; set; }
+            public bool IsPilot { get; set; } 
+
+            public string UserStatus() {
+                var pilotMessage = IsPilot ? "Piloting." : "Press 'P' to pilot.";
+                return string.Format("On Ship {0}. {1}",
+                    ShipId, pilotMessage
+                );
+            }
+        }
 
         interface ISelection {}
 
@@ -34,12 +54,6 @@ namespace Assets.Gamelogic.Player
         {
             public GameObject ShipObject { get; set; }
             public ShipMetadataReceiver ShipMetadataReceiver { get; set; }
-
-            public SelectedShip(GameObject shipObject, ShipMetadataReceiver shipMetadataReceiver) 
-            {
-                ShipObject = shipObject;
-                ShipMetadataReceiver = shipMetadataReceiver;
-            }
 
             public double DistanceFromPlayer(GameObject playerObject)
             {
@@ -64,12 +78,6 @@ namespace Assets.Gamelogic.Player
             public GameObject IslandObject { get; set; }
             public IslandMetadataReceiver IslandMetadataReceiver { get; set; }
 
-            public SelectedIsland(GameObject islandObject, IslandMetadataReceiver islandMetadataReceiver)
-            {
-                IslandObject = islandObject;
-                IslandMetadataReceiver = islandMetadataReceiver;
-            }
-
             public string UserMessage()
             {
                 return string.Format("Selected {0}", IslandMetadataReceiver.IslandName());
@@ -83,17 +91,82 @@ namespace Assets.Gamelogic.Player
 		// Component References
         private Camera _mainCamera;
 		private Text _userMessage;
+        private Text _userStatus;
+
+        private bool _initialized = false;
+
+        private bool SetOnPlatform(EntityId entityId) {
+            var metaComponent = SpatialOS.GetLocalEntityComponent<Metadata>(entityId);
+                if (metaComponent == null) {
+                    Debug.Log("Local entities not available, no metadata component...");
+                    return false;
+                } else {
+                    Debug.Log("Got platform metadata component!");
+
+                    string platformType = metaComponent.Get().Value.entityType;
+                    if (platformType == SimulationSettings.IslandTagName) {
+                        _currentPlatform = new OnIsland {
+                            IslandId = entityId,
+                        };
+                    } else if (platformType == SimulationSettings.ShipTagName) {
+                        _currentPlatform = new OnShip {
+                            ShipId = entityId,
+                            IsPilot = false,
+                        };
+                    } else {
+                        throw new Exception("Invalid component state, platform neither island nor ship");
+                    }
+
+                    return true;
+                }
+        }
+
+        private IEnumerator PollForPlatform() {
+            while(true) {
+                Debug.Log("Polling for platform");
+                var platformEntityId = PlatformPositionReader.Data.platformEntity;
+                if (SetOnPlatform(platformEntityId)) {
+                    _initialized = true;
+                    yield break;
+                } else {
+                    yield return new WaitForSeconds(.25f);
+                }
+            }
+        }
 
         private void OnEnable()
         {
             _mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+
 			_userMessage = GameObject.FindGameObjectWithTag("UserMessage").GetComponent<Text>();
+            _userMessage.text = "";
+
+            _userStatus = GameObject.FindGameObjectWithTag("UserStatus").GetComponent<Text>();
+            _userStatus.text = "Initializing...";
+
+            PlatformPositionReader.PlatformEntityUpdated.Add(OnPlatformEntityUpdated);
+
+            StartCoroutine("PollForPlatform");
+        }
+
+        private void OnDisable()
+        {
+            PlatformPositionReader.PlatformEntityUpdated.Remove(OnPlatformEntityUpdated);
+        }
+
+        private void OnPlatformEntityUpdated(EntityId newPlatformId) {
+            _initialized = false; // freeze user input
+            StartCoroutine("PollForPlatform"); // kind of janky
         }
 
         [Require] private WalkControls.Writer WalkControlsWriter;
+        [Require] private PlatformPosition.Reader PlatformPositionReader;
 
         private void Update()
         {
+            if (!_initialized) {
+                return;
+            }
             UpdateSelection();
 			UpdateWalkControls();
 			UpdateActionControls();
@@ -134,17 +207,19 @@ namespace Assets.Gamelogic.Player
                         case SimulationSettings.ShipTagName:
                             var shipMetadata = hitGameObject.GetComponent<ShipMetadataReceiver>();
                             Debug.Log("Clicked on a ship: " + shipMetadata.ShipName());
-                            _currentSelection = new SelectedShip(
-                                shipObject: hitGameObject,
-                                shipMetadataReceiver: shipMetadata);
+                            _currentSelection = new SelectedShip {
+                                ShipObject = hitGameObject,
+                                ShipMetadataReceiver = shipMetadata,
+                            };
                             break;
 
                         case SimulationSettings.IslandTagName:
                             var islandMetadata = hitGameObject.GetComponent<IslandMetadataReceiver>();
                             Debug.Log("Clicked on an island: " + islandMetadata.IslandName());
-                            _currentSelection = new SelectedIsland(
-                                islandObject: hitGameObject,
-                                islandMetadataReceiver: islandMetadata);
+                            _currentSelection = new SelectedIsland {
+                                IslandObject = hitGameObject,
+                                IslandMetadataReceiver = islandMetadata,
+                            };
                             break;
                     }
                 }
@@ -174,6 +249,7 @@ namespace Assets.Gamelogic.Player
         private void OnBoardSuccess(BoardResponse response)
         {
             Debug.Log("Board success");
+            _currentSelection = new SelectedNothing();
         }
 
         private void OnBoardFailure(ICommandErrorDetails response)
@@ -191,6 +267,19 @@ namespace Assets.Gamelogic.Player
                 } else if (_currentSelection is SelectedIsland) {
                     var island = (SelectedIsland)_currentSelection;
                     _userMessage.text = island.UserMessage();
+                } else if (_currentSelection is SelectedNothing) {
+                    _userMessage.text = "";
+                }
+            }
+
+            if (_userStatus != null)
+            {
+                if (_currentPlatform is OnShip) {
+                    var ship = (OnShip)_currentPlatform;
+                    _userStatus.text = ship.UserStatus();
+                } else if (_currentPlatform is OnIsland) {
+                    var island = (OnIsland)_currentPlatform;
+                    _userStatus.text = island.UserStatus();
                 }
             }
         }
