@@ -41,6 +41,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddComponent(new ClientAuthorityCheck.Data(), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(new ClientConnection.Data(SimulationSettings.TotalHeartbeatsBeforeTimeout, clientId, playerCreatorId), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new WalkControls.Data(new Vector3f(0.0f, 0.0f, 0.0f)), CommonRequirementSets.SpecificClientOnly(clientId))
+                .AddComponent(new PilotControls.Data(0.0f, 0.0f), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(platformPosiionData, CommonRequirementSets.PhysicsOnly)
                 .Build();
 

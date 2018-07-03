@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Island
   - Ship
+  - UserMessage
   layers:
   - Default
   - TransparentFX
