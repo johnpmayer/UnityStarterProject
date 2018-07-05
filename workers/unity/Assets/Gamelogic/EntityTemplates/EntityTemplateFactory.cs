@@ -41,7 +41,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddComponent(new ClientAuthorityCheck.Data(), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(new ClientConnection.Data(SimulationSettings.TotalHeartbeatsBeforeTimeout, clientId, playerCreatorId), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new WalkControls.Data(new Vector3f(0.0f, 0.0f, 0.0f)), CommonRequirementSets.SpecificClientOnly(clientId))
-                .AddComponent(new PilotControls.Data(0.0f, 0.0f), CommonRequirementSets.SpecificClientOnly(clientId))
+                .AddComponent(new PilotControls.Data(0.0f, 0.0f, false), CommonRequirementSets.SpecificClientOnly(clientId))
                 .AddComponent(platformPosiionData, CommonRequirementSets.PhysicsOnly)
                 .Build();
 
@@ -79,6 +79,7 @@ namespace Assets.Gamelogic.EntityTemplates
                 .AddComponent(new Rotation.Data(rotationQuaternion.ToNativeQuaternion()), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new ShipMetadata.Data(name), CommonRequirementSets.PhysicsOnly)
                 .AddComponent(new PlatformBounds.Data(-5.0f, 5.0f, -3.0f, 3.0f), CommonRequirementSets.PhysicsOnly)
+                .AddComponent(new ActivePilot.Data(null), CommonRequirementSets.PhysicsOnly)
                 .Build();
 
             return shipTemplate;

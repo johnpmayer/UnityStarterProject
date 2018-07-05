@@ -160,6 +160,7 @@ namespace Assets.Gamelogic.Player
         }
 
         [Require] private WalkControls.Writer WalkControlsWriter;
+        [Require] private PilotControls.Writer PilotControlsWriter;
         [Require] private PlatformPosition.Reader PlatformPositionReader;
 
         private void Update()
@@ -168,7 +169,12 @@ namespace Assets.Gamelogic.Player
                 return;
             }
             UpdateSelection();
-			UpdateWalkControls();
+            if (_currentPlatform is OnShip && ((OnShip)_currentPlatform).IsPilot) {
+                UpdatePilotControls();
+            } else {
+                UpdateWalkControls();
+            }
+
 			UpdateActionControls();
 			UpdateUI();
         }
@@ -183,6 +189,12 @@ namespace Assets.Gamelogic.Player
                 }
             }
 
+            if (_currentPlatform is OnShip && !((OnShip)_currentPlatform).IsPilot) {
+                if (Input.GetKeyDown(KeyCode.P))
+                {
+                    TryPilot(((OnShip)_currentPlatform).ShipId);
+                }
+            }
         }
 
 		private void UpdateWalkControls()
@@ -192,6 +204,15 @@ namespace Assets.Gamelogic.Player
             WalkControlsWriter.Send(new WalkControls.Update()
                 .SetTargetSpeed(new Improbable.Vector3f(targetX, 0.0f, targetZ)));
 		}
+
+        private void UpdatePilotControls()
+        {
+            float rudder = Input.GetAxis("Horizontal");
+            float throttle = Input.GetAxis("Vertical");
+            PilotControlsWriter.Send(new PilotControls.Update()
+                                     .SetPropellor(throttle)
+                                     .SetRudder(rudder));
+        }
 
         private void UpdateSelection()
         {
@@ -243,7 +264,23 @@ namespace Assets.Gamelogic.Player
 
         public void TryPilot(EntityId shipEntityId)
         {
-
+            SpatialOS.Commands.SendCommand(
+                PilotControlsWriter,
+                ActivePilot.Commands.Pilot.Descriptor,
+                new PilotRequest(gameObject.EntityId()),
+                shipEntityId
+            ).OnSuccess((response) =>
+            {
+                if (_currentPlatform is OnShip)
+                {
+                    OnShip ship = (OnShip)_currentPlatform;
+                    PilotControlsWriter.Send(new PilotControls.Update().SetActive(true));
+                    ship.IsPilot = response.success;
+                }
+            }).OnFailure((response) =>
+            {
+                Debug.LogError("Pilot failed: " + response.ErrorMessage);
+            });
         }
 
         private void OnBoardSuccess(BoardResponse response)

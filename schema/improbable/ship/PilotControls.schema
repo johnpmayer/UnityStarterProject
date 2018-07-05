@@ -5,4 +5,21 @@ component PilotControls {
  
     float propellor = 1; // between -1.0f and 1.0f
     float rudder = 2; // between -1.0f and 1.0f
+
+    bool active = 3;
+}
+
+type PilotResponse {
+    bool success = 1;
+}
+type PilotRequest {
+    EntityId player_id = 1;
+}
+
+component ActivePilot {
+    id = 3002;
+
+    option<EntityId> player_id = 1;
+
+    command PilotResponse pilot(PilotRequest);
 }
