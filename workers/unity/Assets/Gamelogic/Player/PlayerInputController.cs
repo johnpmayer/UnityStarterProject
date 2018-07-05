@@ -22,23 +22,27 @@ namespace Assets.Gamelogic.Player
     [WorkerType(WorkerPlatform.UnityClient)]
     public class PlayerInputController : MonoBehaviour
     {
-        interface IOnPlatform {}
+        interface IOnPlatform { }
 
-        class OnIsland : IOnPlatform {
+        class OnIsland : IOnPlatform
+        {
             public EntityId IslandId { get; set; }
 
-            public string UserStatus() {
+            public string UserStatus()
+            {
                 return string.Format("On Island {0}.",
                     IslandId
                 );
             }
         }
 
-        class OnShip : IOnPlatform {
+        class OnShip : IOnPlatform
+        {
             public EntityId ShipId { get; set; }
-            public bool IsPilot { get; set; } 
+            public bool IsPilot { get; set; }
 
-            public string UserStatus() {
+            public string UserStatus()
+            {
                 var pilotMessage = IsPilot ? "Piloting." : "Press 'P' to pilot.";
                 return string.Format("On Ship {0}. {1}",
                     ShipId, pilotMessage
@@ -46,10 +50,10 @@ namespace Assets.Gamelogic.Player
             }
         }
 
-        interface ISelection {}
+        interface ISelection { }
 
         class SelectedNothing : ISelection { }
-        
+
         class SelectedShip : ISelection
         {
             public GameObject ShipObject { get; set; }
@@ -84,51 +88,67 @@ namespace Assets.Gamelogic.Player
             }
         }
 
-		// State
-		private ISelection _currentSelection;
-		private IOnPlatform _currentPlatform;
+        // State
+        private ISelection _currentSelection;
+        private IOnPlatform _currentPlatform;
 
-		// Component References
+        // Component References
         private Camera _mainCamera;
-		private Text _userMessage;
+        private Text _userMessage;
         private Text _userStatus;
 
         private bool _initialized = false;
 
-        private bool SetOnPlatform(EntityId entityId) {
+        private bool SetOnPlatform(EntityId entityId)
+        {
             var metaComponent = SpatialOS.GetLocalEntityComponent<Metadata>(entityId);
-                if (metaComponent == null) {
-                    Debug.Log("Local entities not available, no metadata component...");
-                    return false;
-                } else {
-                    Debug.Log("Got platform metadata component!");
+            if (metaComponent == null)
+            {
+                Debug.Log("Local entities not available, no metadata component...");
+                return false;
+            }
+            else
+            {
+                Debug.Log("Got platform metadata component!");
 
-                    string platformType = metaComponent.Get().Value.entityType;
-                    if (platformType == SimulationSettings.IslandTagName) {
-                        _currentPlatform = new OnIsland {
-                            IslandId = entityId,
-                        };
-                    } else if (platformType == SimulationSettings.ShipTagName) {
-                        _currentPlatform = new OnShip {
-                            ShipId = entityId,
-                            IsPilot = false,
-                        };
-                    } else {
-                        throw new Exception("Invalid component state, platform neither island nor ship");
-                    }
-
-                    return true;
+                string platformType = metaComponent.Get().Value.entityType;
+                if (platformType == SimulationSettings.IslandTagName)
+                {
+                    _currentPlatform = new OnIsland
+                    {
+                        IslandId = entityId,
+                    };
                 }
+                else if (platformType == SimulationSettings.ShipTagName)
+                {
+                    _currentPlatform = new OnShip
+                    {
+                        ShipId = entityId,
+                        IsPilot = false,
+                    };
+                }
+                else
+                {
+                    throw new Exception("Invalid component state, platform neither island nor ship");
+                }
+
+                return true;
+            }
         }
 
-        private IEnumerator PollForPlatform() {
-            while(true) {
+        private IEnumerator PollForPlatform()
+        {
+            while (true)
+            {
                 Debug.Log("Polling for platform");
                 var platformEntityId = PlatformPositionReader.Data.platformEntity;
-                if (SetOnPlatform(platformEntityId)) {
+                if (SetOnPlatform(platformEntityId))
+                {
                     _initialized = true;
                     yield break;
-                } else {
+                }
+                else
+                {
                     yield return new WaitForSeconds(.25f);
                 }
             }
@@ -138,7 +158,7 @@ namespace Assets.Gamelogic.Player
         {
             _mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
-			_userMessage = GameObject.FindGameObjectWithTag("UserMessage").GetComponent<Text>();
+            _userMessage = GameObject.FindGameObjectWithTag("UserMessage").GetComponent<Text>();
             _userMessage.text = "";
 
             _userStatus = GameObject.FindGameObjectWithTag("UserStatus").GetComponent<Text>();
@@ -154,7 +174,8 @@ namespace Assets.Gamelogic.Player
             PlatformPositionReader.PlatformEntityUpdated.Remove(OnPlatformEntityUpdated);
         }
 
-        private void OnPlatformEntityUpdated(EntityId newPlatformId) {
+        private void OnPlatformEntityUpdated(EntityId newPlatformId)
+        {
             _initialized = false; // freeze user input
             StartCoroutine("PollForPlatform"); // kind of janky
         }
@@ -165,23 +186,28 @@ namespace Assets.Gamelogic.Player
 
         private void Update()
         {
-            if (!_initialized) {
+            if (!_initialized)
+            {
                 return;
             }
             UpdateSelection();
-            if (_currentPlatform is OnShip && ((OnShip)_currentPlatform).IsPilot) {
+            if (_currentPlatform is OnShip && ((OnShip)_currentPlatform).IsPilot)
+            {
                 UpdatePilotControls();
-            } else {
+            }
+            else
+            {
                 UpdateWalkControls();
             }
 
-			UpdateActionControls();
-			UpdateUI();
+            UpdateActionControls();
+            UpdateUI();
         }
 
         private void UpdateActionControls()
         {
-            if (_currentSelection is SelectedShip) {
+            if (_currentSelection is SelectedShip)
+            {
                 var ship = (SelectedShip)_currentSelection;
                 if (Input.GetKeyDown(KeyCode.B))
                 {
@@ -189,7 +215,8 @@ namespace Assets.Gamelogic.Player
                 }
             }
 
-            if (_currentPlatform is OnShip && !((OnShip)_currentPlatform).IsPilot) {
+            if (_currentPlatform is OnShip && !((OnShip)_currentPlatform).IsPilot)
+            {
                 if (Input.GetKeyDown(KeyCode.P))
                 {
                     TryPilot(((OnShip)_currentPlatform).ShipId);
@@ -197,21 +224,39 @@ namespace Assets.Gamelogic.Player
             }
         }
 
-		private void UpdateWalkControls()
-		{
-			float targetX = Input.GetAxis("Horizontal");
+        private void UpdateWalkControls()
+        {
+            float targetX = Input.GetAxis("Horizontal");
             float targetZ = Input.GetAxis("Vertical");
             WalkControlsWriter.Send(new WalkControls.Update()
                 .SetTargetSpeed(new Improbable.Vector3f(targetX, 0.0f, targetZ)));
-		}
+        }
+
+        private class LastPilotControls {
+            public DateTime LastTickExpiry { get; set; }
+            public float Rudder { get; set; }
+            public float Throttle { get; set; }
+        }
+
+        private LastPilotControls lastPilotControls = new LastPilotControls();
+
+        private void DebounceSendPilotControls(float rudder, float throttle) {
+            var needsUpdate = (lastPilotControls.Rudder != rudder) || (lastPilotControls.Throttle != throttle) || (lastPilotControls.LastTickExpiry.CompareTo(DateTime.Now) < 1);
+            if (needsUpdate) {
+                lastPilotControls.Rudder = rudder;
+                lastPilotControls.Throttle = throttle;
+                lastPilotControls.LastTickExpiry = DateTime.Now.AddSeconds(5);
+                PilotControlsWriter.Send(new PilotControls.Update()
+                                     .SetPropellor(throttle)
+                                     .SetRudder(rudder));
+            }
+        }
 
         private void UpdatePilotControls()
         {
             float rudder = Input.GetAxis("Horizontal");
             float throttle = Input.GetAxis("Vertical");
-            PilotControlsWriter.Send(new PilotControls.Update()
-                                     .SetPropellor(throttle)
-                                     .SetRudder(rudder));
+            DebounceSendPilotControls(rudder, throttle);
         }
 
         private void UpdateSelection()
