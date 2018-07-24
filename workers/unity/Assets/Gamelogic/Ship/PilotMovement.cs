@@ -12,6 +12,8 @@ namespace Assets.Gamelogic.Ship
     [WorkerType(WorkerPlatform.UnityWorker)]
     public class PilotMovement : MonoBehaviour
     {
+        // TODO - https://www.marineinsight.com/naval-architecture/rudder-ship-turning/
+
         [Require] private Position.Writer PositionWriter;
 
         private float _targetThrotttle;
