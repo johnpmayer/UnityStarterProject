@@ -20,12 +20,12 @@ namespace Assets.Gamelogic.Ship
 
         private Rigidbody rb;
 
-        public float maxPropellorForce;
-        public float maxRudderForce;
-        public float baseSwayForce;
+        private float maxPropellorForce = 5f;
+        private float maxRudderForce = 0.01f;
+        private float baseSwayForce = 10f;
 
-        private const float shipHalfLength = 7.0f;
-        private const float bowSternSwayOffset = 1.0f;
+        private const float shipHalfLength = 7f;
+        private const float keelCenterOffsetDistance = 0.5f;
 
         private void OnEnable()
         {
@@ -53,9 +53,9 @@ namespace Assets.Gamelogic.Ship
             var starboard = Vector3.back;
 
             // Local Constants
-            Vector3 propellorOffset = 6.0f * stern;
-            Vector3 rudderOffset = 7.0f * stern;
-            Vector3 effectiveSwayOffset = 2.0f * bow;
+            Vector3 propellorOffset = shipHalfLength * stern;
+            Vector3 rudderOffset = shipHalfLength * stern;
+            Vector3 keelCenterOffset = keelCenterOffsetDistance * bow;
 
             Vector3Transform fromShipLocal = (input) =>
                 rb.position + rb.rotation * input;
@@ -63,36 +63,44 @@ namespace Assets.Gamelogic.Ship
             // Absolute Tick-Constants
             Vector3 propellorPosition = fromShipLocal(propellorOffset);
             Vector3 rudderPosition = fromShipLocal(rudderOffset);
-            Vector3 effectiveSwayPosition = fromShipLocal(effectiveSwayOffset);
-            Vector3 shipRelativeVelocity = UnityEngine.Quaternion.Inverse(rb.rotation) * -rb.velocity;
+            Vector3 keelCenterPosition = fromShipLocal(keelCenterOffset);
+            Vector3 relativeShipVelocity = UnityEngine.Quaternion.Inverse(rb.rotation) * rb.velocity;
 
-            // Positive means water approaching from stern (back)
-            // Negative means water approaching from bow (front)
-            float surgeVelocityX = shipRelativeVelocity.x;
+            // Positive means moving to bow, water approaching from bow
+            // Negative means moving to stern, water approaching from stern
+            float surgeVelocityX = relativeShipVelocity.x;
 
-            // Positive means water approaching from starboard (right)
-            // Negative means water approaching from port (left)
-            float swayVelocityY = shipRelativeVelocity.y; 
+            // Positive means swaying to port, water approaching from port
+            // Negative means swaying to starboard, water approaching from starboard
+            float swayVelocityZ = relativeShipVelocity.z;
 
             // Propellor
             Vector3 propellorForce = rb.rotation * (_targetThrotttle * maxPropellorForce * bow);
             rb.AddForceAtPosition(propellorForce, propellorPosition);
 
             // Rudder
-            /* If surge is negative (moving forward) and rudder is positive 
+            /* 
+             * Considering the case where pilot intends to turn the ship right.
+             * 
+             * If surge is positive (moving forward) and rudder is positive 
              * (intent to turn right) then we want to sway the stern to port. 
              * So the rudder force, with the rudder being at the stern, should 
              * be towards port. 
              */
-            Vector3 rudderForce = rb.rotation * (_targetRudder * maxRudderForce * surgeVelocityX * starboard);
+            Vector3 rudderForce = rb.rotation * (_targetRudder * maxRudderForce * surgeVelocityX * port);
             rb.AddForceAtPosition(rudderForce, rudderPosition);
 
-            // TODO sway force proportional to sway component of velocity
+            // Keel
+            /*
+             * Considering the case where pilot intends to turn the ship right.
+             * 
+             * If sway is positive (swaying to port, water approaching from 
+             * port), the keel force is towards starboard.
+             */
+            Vector3 keelForce = rb.rotation * (baseSwayForce * swayVelocityZ * starboard);
+            rb.AddForceAtPosition(keelForce, keelCenterPosition);
 
-            //var swayForceMagnitude = baseSwayForce * swayVelocityMagnitude;
-            //var swayForce = new Vector3(0.0f, 0.0f, swayForceMagnitude);
-            //var swayPosition = new Vector3(bowSternSwayOffset, 0.0f, 0.0f); // A bit in front of the center-of-mass
-            //rb.AddForceAtPosition(swayForce, swayPosition);
+            // TODO! need to take into account rotational intertia!!!
         }
 
         public void Update()
