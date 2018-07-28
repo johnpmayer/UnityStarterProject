@@ -23,6 +23,7 @@ namespace Assets.Gamelogic.Ship
         private float maxPropellorForce = 5f;
         private float maxRudderForce = 0.01f;
         private float baseSwayForce = 10f;
+        private float baseKeelDrag = -8f;
 
         private const float shipHalfLength = 7f;
         private const float keelCenterOffsetDistance = 0.5f;
@@ -100,7 +101,8 @@ namespace Assets.Gamelogic.Ship
             Vector3 keelForce = rb.rotation * (baseSwayForce * swayVelocityZ * starboard);
             rb.AddForceAtPosition(keelForce, keelCenterPosition);
 
-            // TODO! need to take into account rotational intertia!!!
+            Vector3 keelDrag = baseKeelDrag * rb.angularVelocity;
+            rb.AddRelativeTorque(keelDrag);
         }
 
         public void Update()
